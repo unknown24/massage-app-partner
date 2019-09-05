@@ -1,0 +1,1 @@
+[] listen hanya untuk tambah document 

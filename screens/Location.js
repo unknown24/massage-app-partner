@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Platform, View, StyleSheet, Switch } from 'react-native';
+import { Platform, View, StyleSheet, Switch, Alert } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as TaskManager from 'expo-task-manager';
@@ -10,12 +10,13 @@ import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings(['Setting a timer']);
 
 
+import { getLastString } from '../library/String'
 import initApp from '../library/firebase/firebase';
 
 const firebase   = initApp()
 const dbh        = firebase.firestore();
 const TASK       = 'update-position'
-const partner_id = 1
+const partner_id = 'p1'
 
 
 export default class App extends Component {
@@ -41,6 +42,7 @@ export default class App extends Component {
     async componentDidMount(){
       
        this._getAllTask()
+       this._listenToPesanan()
         // await Location.startLocationUpdatesAsync('juara', {
         //     accuracy: Location.Accuracy.High,
         //   });
@@ -48,15 +50,38 @@ export default class App extends Component {
     }
 
     _listenToPesanan(){
-      dbh.collection("pesanan")
+
+      dbh.collection("pesanan").where("partner_id", "==", partner_id)
         .onSnapshot(function(querySnapshot) {
-            
-          var cities = [];
-            querySnapshot.forEach(function(doc) {
-                cities.push(doc.data().lokasi);
+          var pesanan = [];
+          querySnapshot.forEach(function(doc) {
+            pesanan.push({
+              id_pesanan: getLastString(doc._document.proto.name),
+              user_id   : doc.data().user_id
             });
-            console.log("Current cities in CA: ", cities.join(", "));
-        })
+          })
+
+          if (pesanan.length > 0) {
+
+            Alert.alert(
+              'Ada pesanan',
+              `Apakah anda akan menerima pesanan dati ${pesanan[0].user_id} ini ?`,
+              [
+                {
+                  text: 'Tolak',
+                  onPress: () => console.log('Cancel Pressed'),
+                  style: 'cancel',
+                },
+                { text: 'Terima', onPress: () => console.log('OK Pressed') },
+              ],
+              { cancelable: false }
+            );
+            console.log(pesanan)
+          } else {
+            console.log('Tidak ada pesanan')
+          }
+      })
+
     }
 
     async _getAllActivePartner (){
@@ -92,14 +117,6 @@ export default class App extends Component {
     this.setState({ location });
   };
 
-
-  updateCurrentLocation(){
-    const partnerAktif = dbh.collection("activePartner").doc(partner_id)
-    partnerAktif.set({
-      lokasi: new firebase.firestore.GeoPoint(0.1, 0.2),
-    })
-  }
-
   async handleToogle(){
     
     await this.setState({switch:!this.state.switch})
@@ -114,7 +131,7 @@ export default class App extends Component {
     } else {
         if(updateLocationTask.length){
           TaskManager.unregisterTaskAsync(TASK)
-          dbh.collection('activePartner').doc('p'+partner_id).delete()
+          dbh.collection('activePartner').doc(partner_id).delete()
           this._getAllTask()
         }
     }
@@ -160,7 +177,7 @@ TaskManager.defineTask(TASK, ({ data, error }) => {
       const longitude = locations[0].coords.longitude
 
       // do something with the locations captured in the background
-      dbh.collection("activePartner").doc("p"+partner_id).set({
+      dbh.collection("activePartner").doc(partner_id).set({
         lokasi: new firebase.firestore.GeoPoint(latitude, longitude),
       })
     }
