@@ -4,7 +4,10 @@ import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
+import queryString from 'query-string'
 import { Container, Header, Content, Card, CardItem, Text, Icon, Right } from 'native-base';
+import Dialog from "react-native-dialog";
+
 
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings(['Setting a timer']);
@@ -17,14 +20,22 @@ const firebase   = initApp()
 const dbh        = firebase.firestore();
 const TASK       = 'update-position'
 const partner_id = 'p1'
+const TIMER  = 20
 
 
 export default class App extends Component {
   state = {
-    location    : null,
-    errorMessage: null,
-    switch      : false,
-    task        : {}
+    currentPesanan: {
+      id_pesanan: null,
+      lokasi    : null,
+      user_id   : null
+    },
+    dialogVisible: false,
+    location     : null,
+    errorMessage : null,
+    switch       : false,
+    task         : {},
+    timer        : TIMER
   };
 
 
@@ -42,52 +53,54 @@ export default class App extends Component {
     async componentDidMount(){
       
        this._getAllTask()
-       this._listenToPesanan()
-        // await Location.startLocationUpdatesAsync('juara', {
-        //     accuracy: Location.Accuracy.High,
-        //   });
-        
+       this._listenToPesanan(this)
     }
 
-    _listenToPesanan(){
+
+    _listenToPesanan(that){
 
       dbh.collection("pesanan").where("partner_id", "==", partner_id)
         .onSnapshot(function(querySnapshot) {
-          var pesanan = [];
-          querySnapshot.forEach(function(doc) {
-            pesanan.push({
-              id_pesanan: getLastString(doc._document.proto.name),
-              user_id   : doc.data().user_id
-            });
+          querySnapshot.docChanges().forEach(function(change) {
+            if (change.type === "added") {
+                var pesanan = [];
+                querySnapshot.forEach(function(doc) {
+
+                  pesanan.push({
+                    id_pesanan: getLastString(doc._document.proto.name),
+                    user_id   : doc.data().user_id,
+                    lokasi    : doc.data().user_location
+                  })
+
+                })
+
+                if (pesanan.length > 0) {
+                    
+                  that.setState({
+                      currentPesanan: pesanan[0],
+                      dialogVisible : true
+                  })
+
+                  let i = TIMER
+                  that.interval = setInterval(function(){
+                    if(i==0){
+                      that._tolakPesanan()
+                    }
+                    console.log(i)
+                    that.setState({timer:i})
+                    i--
+                  },1000)
+
+                    
+                } else {
+                  console.log('Tidak ada pesanan')
+                }
+            }
           })
-
-          if (pesanan.length > 0) {
-
-            Alert.alert(
-              'Ada pesanan',
-              `Apakah anda akan menerima pesanan dati ${pesanan[0].user_id} ini ?`,
-              [
-                {
-                  text: 'Tolak',
-                  onPress: () => console.log('Cancel Pressed'),
-                  style: 'cancel',
-                },
-                { text: 'Terima', onPress: () => console.log('OK Pressed') },
-              ],
-              { cancelable: false }
-            );
-            console.log(pesanan)
-          } else {
-            console.log('Tidak ada pesanan')
-          }
       })
 
     }
 
-    async _getAllActivePartner (){
-      const activePartner = await dbh.collection("activePartner").get().docs.map(doc => doc.data())
-      console.log(activePartner)
-    }
 
     async _getAllTask(){
       this.allTask = await TaskManager.getRegisteredTasksAsync()
@@ -115,7 +128,9 @@ export default class App extends Component {
 
     let location = await Location.getCurrentPositionAsync({});
     this.setState({ location });
-  };
+  }
+
+  
 
   async handleToogle(){
     
@@ -137,9 +152,27 @@ export default class App extends Component {
     }
 
   }
+
+  _tolakPesanan(){
+    clearInterval(this.interval)
+    const params = {
+      user_id   : this.state.currentPesanan.user_id,
+      latitude  : this.state.currentPesanan.lokasi._lat,
+      longitude : this.state.currentPesanan.lokasi._long,
+      skipped   : partner_id,
+      id_pesanan: this.state.currentPesanan.id_pesanan,
+    }
+    const stringified = queryString.stringify(params)
+    fetch('http://d24635f6.ngrok.io/massage-app-server/order.php?' + stringified)
+      .then(res=>res.json()).then(res=> {
+        console.log(res)
+
+        this.setState({dialogVisible:false})
+      })
+  }
   
   render() {
-
+    const title = `Ada Pesanan (${this.state.timer})`
     return (
         <Container>
             <Content>
@@ -157,7 +190,18 @@ export default class App extends Component {
                   </Right>
                 </CardItem>
             </Card>
-            </Content>      
+            </Content>     
+            <Dialog.Container visible={this.state.dialogVisible}>
+                  <Dialog.Title>{title}</Dialog.Title>
+                  <Dialog.Description>
+                    Apakah anda ingin menerima pesanan ini?
+                  </Dialog.Description>
+                <Dialog.Button label="Terima" onPress={()=> this.setState({dialogVisible:false})}/>
+                <Dialog.Button label="Tolak" onPress={()=> {
+                  this._tolakPesanan()
+                  this.setState({dialogVisible:false})
+                }}/>
+            </Dialog.Container> 
         </Container>
     );
   }
