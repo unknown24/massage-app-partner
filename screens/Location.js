@@ -7,7 +7,8 @@ import * as Location from 'expo-location';
 import queryString from 'query-string'
 import { Container, Header, Content, Card, CardItem, Text, Icon, Right } from 'native-base';
 import Dialog from "react-native-dialog";
-
+import Image from 'react-native-remote-svg';
+import baseURL from '../constants/API'
 
 import { YellowBox } from 'react-native';
 YellowBox.ignoreWarnings(['Setting a timer']);
@@ -19,7 +20,7 @@ import initApp from '../library/firebase/firebase';
 const firebase   = initApp()
 const dbh        = firebase.firestore();
 const TASK       = 'update-position'
-const partner_id = 'p1'
+const partner_id = 'p1' //TODO buat dinamis
 const TIMER  = 20
 
 
@@ -166,7 +167,7 @@ export default class App extends Component {
       id_pesanan: this.state.currentPesanan.id_pesanan,
     }
     const stringified = queryString.stringify(params)
-    fetch('http://d24635f6.ngrok.io/massage-app-server/acceptOrder.php??' + stringified)
+    fetch(baseURL +'massage-app-server/acceptOrder.php??' + stringified)
       .then(res=>res.json()).then(res=> {
         console.log(res)
         this.setState({dialogVisible:false})
@@ -183,20 +184,30 @@ export default class App extends Component {
       id_pesanan: this.state.currentPesanan.id_pesanan,
     }
     const stringified = queryString.stringify(params)
-    fetch('http://d24635f6.ngrok.io/massage-app-server/order.php?' + stringified)
+    fetch(baseURL + 'massage-app-server/order.php?' + stringified)
       .then(res=>res.json()).then(res=> {
         console.log(res)
-
         this.setState({dialogVisible:false})
       })
   }
   
   render() {
     const title = `Ada Pesanan (${this.state.timer})`
+    
+    let statusImage, statusText 
+
+    if (this.state.switch) {
+      statusText = "Kamu Online"
+      statusImage = require('../assets/images/online.svg')
+    } else {
+      statusText = "Kamu Offline"
+      statusImage = require('../assets/images/offline.svg')
+    }
+
     return (
         <Container>
             <Header />
-            <Content>
+            <Content contentContainerStyle={{flex:1}}>
               <Card>
                   <CardItem>
                     <Text>Aktifkan Fitur Pemijat </Text>
@@ -211,6 +222,12 @@ export default class App extends Component {
                     </Right>
                   </CardItem>
               </Card>
+              <View style={{justifyContent:"center", alignItems:'center',flex:1}}>
+                <Image 
+                  source={statusImage}
+                  style={{width:200, height:150}}/>
+                 <Text style={{fontSize:20}}>{statusText}</Text>
+              </View>
             </Content>     
             <Dialog.Container visible={this.state.dialogVisible}>
               <Dialog.Title>{title}</Dialog.Title>
@@ -220,8 +237,7 @@ export default class App extends Component {
               <Dialog.Button label="Terima" onPress={()=> {
                   this._terimaPesanan()
                   this.setState({dialogVisible:false})
-              }}
-                />
+              }}/>
               <Dialog.Button label="Tolak" onPress={()=> {
                 this._tolakPesanan()
                 this.setState({dialogVisible:false})

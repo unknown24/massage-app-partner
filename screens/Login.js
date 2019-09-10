@@ -32,7 +32,7 @@ export default class AnatomyExample extends Component {
     
     if (respon.status) {
         // lempar screen
-        await AsyncStorage.setItem("login", "1")
+        await AsyncStorage.multiSet([['login', '1'], ['pid', respon.data.pid]], err=> console.log(err))
         navigate('Main')
 
     } else {
