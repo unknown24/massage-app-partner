@@ -24,6 +24,10 @@ const TIMER  = 20
 
 
 export default class App extends Component {
+  static navigationOptions = {
+    header: null,
+  }
+  
   state = {
     currentPesanan: {
       id_pesanan: null,
@@ -153,6 +157,22 @@ export default class App extends Component {
 
   }
 
+  _terimaPesanan(){
+    clearInterval(this.interval)
+    const params = {
+      user_id   : this.state.currentPesanan.user_id,
+      partner_id: partner_id,
+      payment   : this.state.currentPesanan.payment,
+      id_pesanan: this.state.currentPesanan.id_pesanan,
+    }
+    const stringified = queryString.stringify(params)
+    fetch('http://d24635f6.ngrok.io/massage-app-server/acceptOrder.php??' + stringified)
+      .then(res=>res.json()).then(res=> {
+        console.log(res)
+        this.setState({dialogVisible:false})
+      })
+  }
+
   _tolakPesanan(){
     clearInterval(this.interval)
     const params = {
@@ -175,32 +195,37 @@ export default class App extends Component {
     const title = `Ada Pesanan (${this.state.timer})`
     return (
         <Container>
+            <Header />
             <Content>
-            <Card>
-                <CardItem>
-                  <Text>Aktifkan Fitur Pemijat </Text>
-                  <Right>
-                      <Switch onValueChange={this.handleToogle.bind(this)} value={this.state.switch}/>
-                  </Right>
-                </CardItem>
-                <CardItem>
-                  <Text>Background Processing </Text>
-                  <Right>
-                      <Text>{this.state.task.taskName}</Text>
-                  </Right>
-                </CardItem>
-            </Card>
+              <Card>
+                  <CardItem>
+                    <Text>Aktifkan Fitur Pemijat </Text>
+                    <Right>
+                        <Switch onValueChange={this.handleToogle.bind(this)} value={this.state.switch}/>
+                    </Right>
+                  </CardItem>
+                  <CardItem>
+                    <Text>Background Processing </Text>
+                    <Right>
+                        <Text>{this.state.task.taskName}</Text>
+                    </Right>
+                  </CardItem>
+              </Card>
             </Content>     
             <Dialog.Container visible={this.state.dialogVisible}>
-                  <Dialog.Title>{title}</Dialog.Title>
-                  <Dialog.Description>
-                    Apakah anda ingin menerima pesanan ini?
-                  </Dialog.Description>
-                <Dialog.Button label="Terima" onPress={()=> this.setState({dialogVisible:false})}/>
-                <Dialog.Button label="Tolak" onPress={()=> {
-                  this._tolakPesanan()
+              <Dialog.Title>{title}</Dialog.Title>
+              <Dialog.Description>
+                Apakah anda ingin menerima pesanan ini?
+              </Dialog.Description>
+              <Dialog.Button label="Terima" onPress={()=> {
+                  this._terimaPesanan()
                   this.setState({dialogVisible:false})
-                }}/>
+              }}
+                />
+              <Dialog.Button label="Tolak" onPress={()=> {
+                this._tolakPesanan()
+                this.setState({dialogVisible:false})
+              }}/>
             </Dialog.Container> 
         </Container>
     );
