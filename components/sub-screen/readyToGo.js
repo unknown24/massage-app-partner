@@ -18,11 +18,12 @@ export default class WatingPayment extends React.Component {
         header: null
     }
     render(){
-        let label ='', image=''
+        const tipe = this.props.navigation.getParam('tipe')
 
+        let label ='', image=''
         const keys = Object.keys(data)
         const finded = keys.find(key =>{
-            if (key == this.props.tipe) {
+            if (key == tipe) {
                 label = data[key].caption
                 image = data[key].image
                 return true
@@ -65,6 +66,6 @@ export default class WatingPayment extends React.Component {
     }
 }
 
-WatingPayment.defaultProps = {
-    tipe : 'ready' // waiting, ready
-}
+// WatingPayment.defaultProps = {
+//     tipe : 'ready' // waiting, ready
+// }

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Platform, View, StyleSheet, Switch, Alert } from 'react-native';
+import { Platform, View, StyleSheet, Switch, Alert, AsyncStorage } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
 import queryString from 'query-string'
-import { Container, Header, Content, Card, CardItem, Text, Icon, Right } from 'native-base';
+import { Container, Header, Content, Card, CardItem, Text, Icon, Right, Body } from 'native-base';
 import Dialog from "react-native-dialog";
 import Image from 'react-native-remote-svg';
 import baseURL from '../constants/API'
@@ -16,12 +16,12 @@ YellowBox.ignoreWarnings(['Setting a timer']);
 
 import { getLastString } from '../library/String'
 import initApp from '../library/firebase/firebase';
+import Colors from '../constants/Colors';
 
 const firebase   = initApp()
 const dbh        = firebase.firestore();
 const TASK       = 'update-position'
-const partner_id = 'p1' //TODO buat dinamis
-const TIMER  = 20
+const TIMER      = 20
 
 
 export default class App extends Component {
@@ -40,7 +40,8 @@ export default class App extends Component {
     errorMessage : null,
     switch       : false,
     task         : {},
-    timer        : TIMER
+    timer        : TIMER,
+    pid          : 0
   };
 
 
@@ -56,15 +57,55 @@ export default class App extends Component {
   
 
     async componentDidMount(){
-      
        this._getAllTask()
-       this._listenToPesanan(this)
+       const pid = await this._getPID()
+       this._listenToPesanan(pid,this)
+       this._listenToClient(pid,this)
+    }
+
+    async _getPID() {
+      const pid        = await AsyncStorage.getItem("pid")
+      this.setState({pid})
+      return pid
+    }
+
+    _listenToClient(pid, that){
+
+      dbh.collection("pesananClient").where("partner_id", "==", pid)
+      .onSnapshot(function(querySnapshot) {
+        querySnapshot.docChanges().forEach(function(change) {
+          
+          if (change.type === "added") {
+              var pesanan = [];
+              querySnapshot.forEach(function(doc) {
+
+                pesanan.push({
+                  partner_id: doc.data().partner_id,
+                  user_id   : doc.data().user_id,
+                  status    : doc.data().status,
+                  payment   : doc.data().payment
+                })
+
+              })
+
+              if (pesanan.length > 0) {
+                  
+                that.props.navigation.navigate('Ready', {
+                  tipe: 'waiting',
+                })
+                  
+              } else {
+                console.log('Tidak ada pesanan')
+              }
+          }
+
+        })
+    })      
     }
 
 
-    _listenToPesanan(that){
-
-      dbh.collection("pesanan").where("partner_id", "==", partner_id)
+    _listenToPesanan(pid, that){
+      dbh.collection("pesanan").where("partner_id", "==", pid)
         .onSnapshot(function(querySnapshot) {
           querySnapshot.docChanges().forEach(function(change) {
             if (change.type === "added") {
@@ -74,7 +115,8 @@ export default class App extends Component {
                   pesanan.push({
                     id_pesanan: getLastString(doc._document.proto.name),
                     user_id   : doc.data().user_id,
-                    lokasi    : doc.data().user_location
+                    lokasi    : doc.data().user_location,
+                    payment   : doc.data().payment
                   })
 
                 })
@@ -151,7 +193,7 @@ export default class App extends Component {
     } else {
         if(updateLocationTask.length){
           TaskManager.unregisterTaskAsync(TASK)
-          dbh.collection('activePartner').doc(partner_id).delete()
+          dbh.collection('activePartner').doc(this.state.pid).delete()
           this._getAllTask()
         }
     }
@@ -162,13 +204,25 @@ export default class App extends Component {
     clearInterval(this.interval)
     const params = {
       user_id   : this.state.currentPesanan.user_id,
-      partner_id: partner_id,
+      partner_id: this.state.pid,
       payment   : this.state.currentPesanan.payment,
       id_pesanan: this.state.currentPesanan.id_pesanan,
     }
+
     const stringified = queryString.stringify(params)
-    fetch(baseURL +'massage-app-server/acceptOrder.php??' + stringified)
-      .then(res=>res.json()).then(res=> {
+    console.log('terima pesanan', stringified)
+    
+    fetch(baseURL +'massage-app-server/acceptOrder.php?' + stringified)
+      .then(res=>{
+        
+        try {
+          const json = res.json()
+          return json
+        } catch (error) {
+          return res.text()
+        }
+
+      }).then(res=> {
         console.log(res)
         this.setState({dialogVisible:false})
       })
@@ -180,12 +234,21 @@ export default class App extends Component {
       user_id   : this.state.currentPesanan.user_id,
       latitude  : this.state.currentPesanan.lokasi._lat,
       longitude : this.state.currentPesanan.lokasi._long,
-      skipped   : partner_id,
+      skipped   : this.state.pid,
       id_pesanan: this.state.currentPesanan.id_pesanan,
     }
     const stringified = queryString.stringify(params)
     fetch(baseURL + 'massage-app-server/order.php?' + stringified)
-      .then(res=>res.json()).then(res=> {
+      .then(res=>{
+
+        try {
+          return res.json()
+        } catch (error) {
+          console.log(error)
+          return res.text()
+        }
+        
+      }).then(res=> {
         console.log(res)
         this.setState({dialogVisible:false})
       })
@@ -210,17 +273,34 @@ export default class App extends Component {
             <Content contentContainerStyle={{flex:1}}>
               <Card>
                   <CardItem>
-                    <Text>Aktifkan Fitur Pemijat </Text>
+                    <Body>
+                      <Text>Aktifkan Fitur Pemijat </Text>
+                    </Body>
                     <Right>
                         <Switch onValueChange={this.handleToogle.bind(this)} value={this.state.switch}/>
                     </Right>
                   </CardItem>
+                  <CardItem bordered style={{backgroundColor: '#e8e8e8'}}>
+                    <Text>Debug Menu</Text>
+                  </CardItem>
                   <CardItem>
-                    <Text>Background Processing </Text>
+                    <Body>
+                      <Text>PID </Text>
+                    </Body>
+                    <Right>
+                        <Text> {this.state.pid} </Text>
+                    </Right>
+                  </CardItem>
+                  <CardItem>
+                    <Body>
+                      <Text>Background Processing </Text>
+                    </Body>
+  
                     <Right>
                         <Text>{this.state.task.taskName}</Text>
                     </Right>
                   </CardItem>
+
               </Card>
               <View style={{justifyContent:"center", alignItems:'center',flex:1}}>
                 <Image 
@@ -249,20 +329,28 @@ export default class App extends Component {
 }
 
 
-TaskManager.defineTask(TASK, ({ data, error }) => {
-    if (error) {
+TaskManager.defineTask(TASK, async ({ data, error }) => {
+    
+  if (error) {
       console.log(error)
-      // Error occurred - check `error.message` for more details.
       return;
     }
+
     if (data) {
-      
+
       const { locations } = data;
       const latitude = locations[0].coords.latitude
       const longitude = locations[0].coords.longitude
 
-      // do something with the locations captured in the background
-      dbh.collection("activePartner").doc(partner_id).set({
+      const pid = await AsyncStorage.getItem('pid')
+
+      if (!pid) {
+        const message = 'pid tidak ada'
+        console.log(message)
+        return
+      }
+
+      dbh.collection("activePartner").doc(pid).set({
         lokasi: new firebase.firestore.GeoPoint(latitude, longitude),
       })
     }

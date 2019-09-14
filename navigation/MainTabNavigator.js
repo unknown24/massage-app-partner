@@ -9,6 +9,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import LocationScreen from '../screens/Location';
 import ReadyToGo from '../components/sub-screen/readyToGo'
 import Login from '../screens/Login'
+import AccountScreen from '../screens/Account'
 
 const config = Platform.select({  
   web             : { headerMode: 'screen' },
@@ -44,6 +45,22 @@ HomeStack.navigationOptions = {
 
 HomeStack.path = '';
 
+
+const AccountStack = createStackNavigator({
+  Account: AccountScreen,
+}, config )
+
+
+AccountStack.navigationOptions = {
+  tabBarLabel: 'Account',
+  tabBarIcon : ({ focused }) => (
+    <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'} />
+  ),
+};
+
+AccountStack.path = '';
+
+
 const LinksStack = createStackNavigator(
   {
     Links: LinksScreen,
@@ -78,8 +95,7 @@ SettingsStack.path = '';
 
 const tabNavigator = createBottomTabNavigator({
   HomeStack,
-  LinksStack,
-  SettingsStack,
+  AccountStack,
 });
 
 tabNavigator.path = '';
