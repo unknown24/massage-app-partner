@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { AsyncStorage } from 'react-native';
 
 import { 
     Container, 
@@ -12,8 +11,9 @@ import {
     Text,
     Label,
 } from 'native-base';
-import URL from '../constants/API'
-import { Image, ToastAndroid, View } from 'react-native';
+import URL from '../constants/API';
+
+import { Image, ToastAndroid, View, AsyncStorage } from 'react-native';
 
 export default class AnatomyExample extends Component {
   
@@ -29,11 +29,12 @@ export default class AnatomyExample extends Component {
     const {navigate} = this.props.navigation;
 
     const respon = await this.validateLogin(email, password)
-    
+
     if (respon.status) {
-        // lempar screen
-        await AsyncStorage.multiSet([['login', '1'], ['pid', respon.data.pid]], err=> console.log(err))
-        navigate('Main')
+      // lempar screen
+
+      AsyncStorage.multiSet([['login', '1'], ['pid', respon.data.id]]).then(()=>console.log('dsds'))
+      navigate('Main')
 
     } else {
         // toast message
@@ -54,10 +55,12 @@ export default class AnatomyExample extends Component {
                   method:'POST',
                   body  :body
               }).then(res => res.json())  
+
     return result
   }
 
   async componentDidMount(){
+
     const isLogin = await AsyncStorage.getItem('login')
     if (!!isLogin) {
         // ToastAndroid.show(isLogin, ToastAndroid.SHORT);

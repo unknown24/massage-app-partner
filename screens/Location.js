@@ -57,8 +57,10 @@ export default class App extends Component {
   
 
     async componentDidMount(){
+
        this._getAllTask()
        const pid = await this._getPID()
+       console.log(pid)
        this._listenToPesanan(pid,this)
        this._listenToClient(pid,this)
     }

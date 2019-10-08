@@ -8,6 +8,8 @@ import AppNavigator from './navigation/AppNavigator';
 import Roboto from './resource/Fonts/Roboto.ttf';
 import RobotoMedium from './resource/Fonts/Roboto_medium.ttf';
 
+import Test from './screens/Test'
+
 
 // export default LinksScreen;
 export default function App(props) {
