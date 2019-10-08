@@ -23,6 +23,13 @@ const dbh        = firebase.firestore();
 const TASK       = 'update-position'
 const TIMER      = 20
 
+function saySuccess(){
+  console.log("Document successfully");
+}
+
+function sayError(error){
+  console.error("Error operation document: ", error);
+}
 
 export default class App extends Component {
   static navigationOptions = {
@@ -60,7 +67,6 @@ export default class App extends Component {
 
        this._getAllTask()
        const pid = await this._getPID()
-       console.log(pid)
        this._listenToPesanan(pid,this)
        this._listenToClient(pid,this)
     }
@@ -331,8 +337,9 @@ export default class App extends Component {
 }
 
 
+
 TaskManager.defineTask(TASK, async ({ data, error }) => {
-    
+  
   if (error) {
       console.log(error)
       return;
@@ -347,13 +354,14 @@ TaskManager.defineTask(TASK, async ({ data, error }) => {
       const pid = await AsyncStorage.getItem('pid')
 
       if (!pid) {
-        const message = 'pid tidak ada'
-        console.log(message)
+        console.log('pid tidak ada')
         return
       }
 
+      
       dbh.collection("activePartner").doc(pid).set({
         lokasi: new firebase.firestore.GeoPoint(latitude, longitude),
-      })
+      }).then(saySuccess).catch(sayError)
+
     }
   })
