@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { Platform, View, StyleSheet, Switch, Alert, AsyncStorage } from 'react-native';
+import { Platform, View, Switch, AsyncStorage } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
 import queryString from 'query-string'
-import { Container, Header, Content, Card, CardItem, Text, Icon, Right, Body } from 'native-base';
+import { Container, Header, Content, Card, CardItem, Text, Right, Body } from 'native-base';
 import Dialog from "react-native-dialog";
 import Image from 'react-native-remote-svg';
 import baseURL from '../constants/API'
@@ -16,7 +16,6 @@ YellowBox.ignoreWarnings(['Setting a timer']);
 
 import { getLastString } from '../library/String'
 import initApp from '../library/firebase/firebase';
-import Colors from '../constants/Colors';
 
 const firebase   = initApp()
 const dbh        = firebase.firestore();
@@ -24,8 +23,9 @@ const TASK       = 'update-position'
 const TIMER      = 20
 
 function saySuccess(){
-  console.log("Document successfully");
+  console.info("Document successfully");
 }
+
 
 function sayError(error){
   console.error("Error operation document: ", error);
@@ -52,7 +52,7 @@ export default class App extends Component {
   };
 
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
       if (Platform.OS === 'android' && !Constants.isDevice) {
           this.setState({
               errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -97,9 +97,8 @@ export default class App extends Component {
               })
 
               if (pesanan.length > 0) {
-                  
                 that.props.navigation.navigate('Ready', {
-                  tipe: 'waiting',
+                  tipe: pesanan[0].payment == 'bank_transfer' ? 'waiting' : 'ready',
                 })
                   
               } else {
@@ -130,7 +129,7 @@ export default class App extends Component {
                 })
 
                 if (pesanan.length > 0) {
-                    
+                  console.log(pesanan)
                   that.setState({
                       currentPesanan: pesanan[0],
                       dialogVisible : true
@@ -141,7 +140,6 @@ export default class App extends Component {
                     if(i==0){
                       that._tolakPesanan()
                     }
-                    console.log(i)
                     that.setState({timer:i})
                     i--
                   },1000)
@@ -218,7 +216,6 @@ export default class App extends Component {
     }
 
     const stringified = queryString.stringify(params)
-    console.log('terima pesanan', stringified)
     
     fetch(baseURL +'massage-app-server/acceptOrder.php?' + stringified)
       .then(res=>{
@@ -230,8 +227,7 @@ export default class App extends Component {
           return res.text()
         }
 
-      }).then(res=> {
-        console.log(res)
+      }).then(()=> {
         this.setState({dialogVisible:false})
       })
   }
@@ -256,8 +252,7 @@ export default class App extends Component {
           return res.text()
         }
         
-      }).then(res=> {
-        console.log(res)
+      }).then(()=> {
         this.setState({dialogVisible:false})
       })
   }

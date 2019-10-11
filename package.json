@@ -16,6 +16,7 @@
     "@expo/vector-icons": "^10.0.3",
     "@react-native-community/async-storage": "^1.6.2",
     "@react-navigation/web": "^1.0.0-alpha.9",
+    "babel-eslint": "^10.0.3",
     "expo": "^34.0.1",
     "expo-asset": "^6.0.0",
     "expo-constants": "6.0.0",
@@ -36,6 +37,7 @@
     "react-native-web": "^0.11.4",
     "react-native-webview": "^7.0.4",
     "react-navigation": "^3.11.0",
+    "react-redux": "^7.1.1",
     "tiny-timer": "^1.4.0"
   },
   "devDependencies": {

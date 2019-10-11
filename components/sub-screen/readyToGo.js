@@ -1,6 +1,6 @@
 import React from 'react'
-import { Container, Text, Content, Header, View, Card, CardItem, Body, Left, Right,  } from 'native-base'
-import Image from 'react-native-remote-svg';
+import { Container, Text, Content, Header, View, Card, CardItem, Body, Left, Button  } from 'native-base'
+import Image from 'react-native-remote-svg'
 
 const data = {
     waiting : {
@@ -24,7 +24,7 @@ export default class WatingPayment extends React.Component {
     render(){
         const tipe = this.props.navigation.getParam('tipe')
 
-        let label ='', image='', button_label=''
+        let label ='', image=''
         const keys = Object.keys(data)
         const finded = keys.find(key =>{
             if (key == tipe) {
@@ -41,6 +41,8 @@ export default class WatingPayment extends React.Component {
             return (<View><Text> Something Wrong </Text></View>)
         }
 
+        
+
         return (
             <Container>
                 <Header/>
@@ -50,7 +52,7 @@ export default class WatingPayment extends React.Component {
                         <Image  
                             style={{width:200, height:200, marginTop:25}} 
                             source={image} />
-                        
+                        {tipe == 'ready' ? <Button onPress={this.props.onSelesaiPijat}><Text>Selesai</Text></Button> : ''} 
                     </View>
                     <Card style={{marginLeft:10, marginRight:10}}>
                         <CardItem bordered first>
