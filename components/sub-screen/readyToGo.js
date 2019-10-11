@@ -10,6 +10,10 @@ const data = {
     ready : {
         caption: "Silahkan segera menuju ke pelanggan ...",
         image: require('../../assets/images/cycling.svg'),
+    },
+    finish : {
+        caption: "Terima kasih silahkan klik kembli untuk menerima orderan ...",
+        image: require('../../assets/images/cycling.svg'),
     }
 }
 
@@ -20,12 +24,13 @@ export default class WatingPayment extends React.Component {
     render(){
         const tipe = this.props.navigation.getParam('tipe')
 
-        let label ='', image=''
+        let label ='', image='', button_label=''
         const keys = Object.keys(data)
         const finded = keys.find(key =>{
             if (key == tipe) {
                 label = data[key].caption
                 image = data[key].image
+
                 return true
             } else {
                 return false
@@ -45,6 +50,7 @@ export default class WatingPayment extends React.Component {
                         <Image  
                             style={{width:200, height:200, marginTop:25}} 
                             source={image} />
+                        
                     </View>
                     <Card style={{marginLeft:10, marginRight:10}}>
                         <CardItem bordered first>
@@ -67,5 +73,5 @@ export default class WatingPayment extends React.Component {
 }
 
 // WatingPayment.defaultProps = {
-//     tipe : 'ready' // waiting, ready
+//     tipe : 'ready' // waiting, ready, finish
 // }
