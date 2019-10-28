@@ -1,34 +1,31 @@
 import React, { Component } from 'react';
-import { Platform, View, Switch, AsyncStorage } from 'react-native';
+import { Platform, View, Switch, AsyncStorage, YellowBox } from 'react-native';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
 import * as TaskManager from 'expo-task-manager';
 import * as Location from 'expo-location';
-import queryString from 'query-string'
+import queryString from 'query-string';
 import { Container, Header, Content, Card, CardItem, Text, Right, Body } from 'native-base';
-import Dialog from "react-native-dialog";
+import Dialog from 'react-native-dialog';
 import Image from 'react-native-remote-svg';
-import baseURL from '../constants/API'
-
-import { YellowBox } from 'react-native';
-YellowBox.ignoreWarnings(['Setting a timer']);
-
-
-import { getLastString } from '../library/String'
+import baseURL from '../constants/API';
+import { getLastString } from '../library/String';
 import initApp from '../library/firebase/firebase';
 
-const firebase   = initApp()
-const dbh        = firebase.firestore();
-const TASK       = 'update-position'
-const TIMER      = 20
+YellowBox.ignoreWarnings(['Setting a timer']);
 
-function saySuccess(){
-  console.info("Document successfully");
+const firebase = initApp();
+const dbh = firebase.firestore();
+const TASK = 'update-position';
+const TIMER = 20;
+
+function saySuccess() {
+  console.info('Document successfully');
 }
 
 
-function sayError(error){
-  console.error("Error operation document: ", error);
+function sayError(error) {
+  console.error('Error operation document: ', error);
 }
 
 export default class App extends Component {
@@ -213,6 +210,7 @@ export default class App extends Component {
       partner_id: this.state.pid,
       payment   : this.state.currentPesanan.payment,
       id_pesanan: this.state.currentPesanan.id_pesanan,
+      detail_terapis: this.state.location,
     }
 
     const stringified = queryString.stringify(params)
