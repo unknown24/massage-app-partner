@@ -1,6 +1,75 @@
 import queryString from 'query-string';
+import {
+  ToastAndroid,
+  AsyncStorage,
+} from 'react-native';
 import baseURL from '../../constants/API';
-import { TERIMA_PESANAN, TERIMA_PESANAN_SUCCESS, TERIMA_PESANAN_FAILED } from '../../constants/ActionTypes';
+import {
+  TERIMA_PESANAN, TERIMA_PESANAN_SUCCESS, TERIMA_PESANAN_FAILED,
+  LOGIN, LOGIN_SUCCESS, LOGIN_FAILED,
+  SELESAIKAN_PESANAN,
+  GO_TO_PELANGGAN,
+  ON_ADA_PESAN,
+} from '../../constants/ActionTypes';
+import NavigationService from '../screens/navigation/NavigationService';
+import SCREEN from '../../constants/Screens';
+
+// Login Screen
+export function login(form_input) {
+  return (dispatch) => {
+    const body = new FormData();
+    body.append('email', form_input.email);
+    body.append('password', form_input.password);
+    body.append('tipe', 'partner');
+    try {
+      dispatch({ type: LOGIN });
+      fetch(`${baseURL}massage-app-server/login.php`, { method: 'POST', body })
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.status) {
+            dispatch({
+              type: LOGIN_SUCCESS,
+              payload: res,
+            });
+            AsyncStorage.multiSet([['login', '1'], ['pid', res.data.id]])
+              .then(() => NavigationService.navigate(SCREEN.HOME));
+          } else {
+            dispatch({
+              type: LOGIN_FAILED,
+              payload: res,
+            });
+            ToastAndroid.show(res.message, ToastAndroid.SHORT);
+          }
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+}
+
+
+// Home Screen
+export function tampilkanDialogPemesanan(data_pesan) {
+  return {
+    type: ON_ADA_PESAN,
+    payload: data_pesan,
+  };
+}
+
+export function goToPelanggan(detail_pelanggan) {
+  return {
+    type: GO_TO_PELANGGAN,
+    payload: detail_pelanggan,
+  };
+}
+
+export function selesaikanPesanan() {
+  return (dispatch) => {
+    dispatch({
+      type: SELESAIKAN_PESANAN,
+    });
+  };
+}
 
 
 export function terimaPesanan(param) {

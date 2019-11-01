@@ -1,95 +1,78 @@
 import React, { Component } from 'react';
-
-import { 
-    Container, 
-    Header, 
-    Content, 
-    Form,
-    Item,
-    Input,
-    Button,
-    Text,
-    Label,
+import {
+  Container,
+  Header,
+  Content,
+  Form,
+  Item,
+  Input,
+  Button,
+  Text,
+  Label,
 } from 'native-base';
-import URL from '../constants/API';
 
-import { Image, ToastAndroid, View, AsyncStorage } from 'react-native';
-
-export default class AnatomyExample extends Component {
-  
-    state = {
-        email   : 'aep.stmik@gmail.com',
-        password: '123456'
-    } 
+import {
+  Image,
+  View,
+} from 'react-native';
+import PropTypes from 'prop-types';
+import { atoms, utilities, molecul } from '../styles';
 
 
-  async handleLogin(){
-    
-    const {email, password} = this.state
-    const {navigate} = this.props.navigation;
+const logo = require('../assets/images/app-store.png');
 
-    const respon = await this.validateLogin(email, password)
-
-    if (respon.status) {
-      // lempar screen
-
-      AsyncStorage.multiSet([['login', '1'], ['pid', respon.data.id]]).then(()=>console.log('dsds'))
-      navigate('Main')
-
-    } else {
-        // toast message
-        ToastAndroid.show(respon.message, ToastAndroid.SHORT);
-    }
-
+export default class Login extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: 'aep.stmik@gmail.com',
+      password: '123456',
+    };
   }
 
-  async validateLogin(email, password){
-    const body = new FormData()
-    body.append("email", email)
-    body.append("password", password)
-    body.append("tipe", 'partner')
-    
-    let result = null
-    
-    result = await fetch(URL +'massage-app-server/login.php', {
-                  method:'POST',
-                  body  :body
-              }).then(res => res.json())  
-
-    return result
-  }
-
-  async componentDidMount(){
-
-    const isLogin = await AsyncStorage.getItem('login')
-    if (!!isLogin) {
-        // ToastAndroid.show(isLogin, ToastAndroid.SHORT);
-        const {navigate} = this.props.navigation
-        navigate('Main')
-    }
+  handleLogin = async () => {
+    const { email, password } = this.state;
+    const { onLogin } = this.props;
+    onLogin({ email, password });
   }
 
   render() {
+    const { email, password } = this.state;
+
     return (
-      <Container >
-        <Header/>
-        <Content contentContainerStyle={{ flexGrow: 1 }} >
-          <View style={{height:200, justifyContent:"center", alignItems:'center'}}>
-            <Image source={require('../assets/images/app-store.png')} />
+      <Container>
+        <Header />
+        <Content contentContainerStyle={utilities.flexFull}>
+          <View style={molecul.LogoContainer}>
+            <Image source={logo} />
           </View>
           <Form>
             <Item floatingLabel>
-                <Label>Email</Label>
-                <Input onChangeText={(text) => this.setState({email:text})} value={this.state.email}/>
+              <Label>Email</Label>
+              <Input onChangeText={(text) => this.setState({ email: text })} value={email} />
             </Item>
             <Item floatingLabel>
-                <Label>Password</Label>
-                <Input secureTextEntry onChangeText={(text) => this.setState({password:text})} value={this.state.password}/>
+              <Label>Password</Label>
+              <Input
+                secureTextEntry
+                onChangeText={(text) => this.setState({ password: text })}
+                value={password}
+              />
             </Item>
-            <Button onPress={this.handleLogin.bind(this)} info style={{justifyContent:'center', marginLeft:20, marginRight:20, marginTop:20}}><Text> Login </Text></Button>
+            <Button
+              onPress={this.handleLogin}
+              info
+              style={atoms.primary_button}
+            >
+              <Text> Login </Text>
+            </Button>
           </Form>
         </Content>
       </Container>
     );
   }
 }
+
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+};

@@ -11,6 +11,7 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 
 import AppNavigator from './navigation/AppNavigator';
+import NavigationService from './src/screens/navigation/NavigationService';
 import Roboto from './resource/Fonts/Roboto.ttf';
 import RobotoMedium from './resource/Fonts/Roboto_medium.ttf';
 
@@ -103,7 +104,11 @@ export default function App() {
     <Provider store={store}>
       <View style={styles.container}>
         {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
+        <AppNavigator
+          ref={(navigatorRef) => {
+            NavigationService.setTopLevelNavigator(navigatorRef);
+          }}
+        />
       </View>
     </Provider>
   );

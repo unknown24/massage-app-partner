@@ -7,7 +7,8 @@ import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LocationScreen from '../screens/Location';
-import ReadyToGo from '../components/sub-screen/readyToGo'
+// import ReadyToGo from '../components/sub-screen/readyToGo';
+import ReadyToGo from '../src/screens_connect/ReadyToGo.con';
 import Login from '../screens/Login'
 import AccountScreen from '../screens/Account'
 

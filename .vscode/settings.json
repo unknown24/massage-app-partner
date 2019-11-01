@@ -3,4 +3,5 @@
     "eslint.workingDirectories" : [
         { "directory": "massage-app-partner", "changeProcessCWD": true },
       ],
+      "editor.tabSize": 2,
 }
