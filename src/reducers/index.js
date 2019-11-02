@@ -1,10 +1,11 @@
 import update from 'immutability-helper';
-import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN } from '../../constants/ActionTypes';
+import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS } from '../../constants/ActionTypes';
 
 
 const initialData = {
   partner_id: null,
   current_location: null,
+  status_aktif: false,
   order_state: 'idle',
   current_pesanan: null,
   current_client: {
@@ -30,12 +31,28 @@ function handlePemesananState(state = initialData, action) {
        * @type {data_pesanan} data
        */
       const data = action.payload;
-
       const new_state = update(state, {
         current_client: {
           current_pesanan: data,
           order_state: 'ada_pesanan',
         },
+      });
+      return new_state;
+    }
+
+    case LOGIN_SUCCESS: {
+      /**
+        * @typedef {Object} data_login
+        * @property {*} data - "". {"id": "p4"},
+        * @property {*} status - "".
+      */
+
+      /**
+       * @type {data_login} data
+       */
+      const data = action.payload;
+      const new_state = update(state, {
+        partner_id: { $set: data.data.id },
       });
       return new_state;
     }
@@ -58,6 +75,39 @@ function handlePemesananState(state = initialData, action) {
       const new_state = update(state, {
         current_client: {
           alamat: data.lokasi,
+        },
+      });
+      return new_state;
+    }
+
+    case UPDATE_LOCATION: {
+      /**
+      * @typedef {Object} coords
+      * @property {*} accuracy - 87.5999984741211.
+      * @property {*} altitude - 0.
+      * @property {*} heading - 0.
+      * @property {*} latitude - -6.8116553.
+      * @property {*} longitude - 107.9185063.
+      * @property {*} speed - 0.
+      */
+
+      /**
+      * @typedef {Object} location
+      * @property {coords} coords -
+      * @property {*} mocked - false.
+      * @property {*} timestamp - 1572669469270.
+      */
+
+      /**
+     * @type {location} location
+     */
+      const location = action.payload;
+      const new_state = update(state, {
+        current_location: {
+          $set: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
         },
       });
       return new_state;

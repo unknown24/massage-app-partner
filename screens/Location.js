@@ -12,12 +12,12 @@ import {
 } from 'native-base';
 import Dialog from 'react-native-dialog';
 import Image from 'react-native-remote-svg';
-import initApp from '../library/firebase/firebase';
+// import initApp from '../library/firebase/firebase';
 
 YellowBox.ignoreWarnings(['Setting a timer']);
 
-const firebase = initApp();
-const dbh = firebase.firestore();
+// const firebase = initApp();
+// const dbh = firebase.firestore();
 const TASK = 'update-position';
 const TIMER = 20;
 
@@ -60,10 +60,6 @@ export default class Dashboard extends Component {
 
     const location = await Location.getCurrentPositionAsync({});
     onGetLocation(location);
-  }
-
-  static navigationOptions = {
-    header: null,
   }
 
   render() {
@@ -165,12 +161,23 @@ TaskManager.defineTask(TASK, async ({ data, error }) => {
 });
 
 Dashboard.propTypes = {
-  pid: PropTypes.string.isRequired,
-  taskname: PropTypes.string.isRequired,
-  displayDialogBox: PropTypes.bool.isRequired,
-  valueToggleAktifkan: PropTypes.bool.isRequired,
-  onGetLocation: PropTypes.func.isRequired,
-  onTerima: PropTypes.func.isRequired,
-  onTolak: PropTypes.func.isRequired,
-  onAktifkan: PropTypes.func.isRequired,
+  pid: PropTypes.string,
+  taskname: PropTypes.string,
+  displayDialogBox: PropTypes.bool,
+  valueToggleAktifkan: PropTypes.bool,
+  onGetLocation: PropTypes.func,
+  onTerima: PropTypes.func,
+  onTolak: PropTypes.func,
+  onAktifkan: PropTypes.func,
+};
+
+Dashboard.defaultProps = {
+  pid: '23',
+  taskname: 'dsadsa',
+  displayDialogBox: false,
+  valueToggleAktifkan: false,
+  onGetLocation: () => console.log(34),
+  onTerima: () => console.log(34),
+  onTolak: () => console.log(34),
+  onAktifkan: () => console.log(34),
 };
