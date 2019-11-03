@@ -2,12 +2,14 @@ import React from 'react';
 import PropsTypes from 'prop-types';
 import * as Permissions from 'expo-permissions'; // eslint-disable-line
 import * as TaskManager from 'expo-task-manager';
-import { ToastAndroid, Platform } from 'react-native';
+import { ToastAndroid, Platform, AsyncStorage } from 'react-native';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
+import { connect } from 'react-redux';
 import Dashboard from './Location';
 import initApp from '../library/firebase/firebase';
 import { getLastString } from '../library/String';
+import { TOGGLE_AKTIF, UPDATE_PESANAN, UPDATE_LOCATION } from '../constants/ActionTypes';
 
 const firebase = initApp();
 const dbh = firebase.firestore();
@@ -15,6 +17,14 @@ const TASK = 'update-position';
 const TIMER = 20;
 
 class DashboardContainer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      current_second: TIMER,
+    };
+  }
+
+
   UNSAFE_componentWillMount() {
     if (Platform.OS === 'android' && !Constants.isDevice) {
       ToastAndroid.show('Oops, this will not work on Sketch in an Android emulator. Try it on your device', ToastAndroid.SHORT);
@@ -23,12 +33,15 @@ class DashboardContainer extends React.Component {
     }
   }
 
+
   async componentDidMount() {
     await this._listenToPesanan();
     await this._getAllTask();
   }
 
+
   _getLocationAsync = async () => {
+    const { dispatch } = this.props;
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
 
     if (status !== 'granted') {
@@ -56,13 +69,15 @@ class DashboardContainer extends React.Component {
      * @type {location} location
      */
     const location = await Location.getCurrentPositionAsync({});
-    const { onGetLocation } = this.props;
-
-    onGetLocation(location);
+    dispatch({
+      type: UPDATE_LOCATION,
+      payload: location,
+    });
   }
 
+
   _listenToPesanan() {
-    const { pid, onAdaPesanan } = this.props;
+    const { pid, dispatch } = this.props;
     dbh.collection('pesanan').where('partner_id', '==', pid)
       .onSnapshot((querySnapshot) => {
         querySnapshot.docChanges().forEach((change) => {
@@ -78,7 +93,18 @@ class DashboardContainer extends React.Component {
             });
 
             if (pesanan.length > 0) {
-              onAdaPesanan(pesanan[0]);
+              dispatch({
+                type: UPDATE_PESANAN,
+                payload: pesanan[0],
+              });
+
+              setTimeout(() => {
+                const { current_second } = this.state;
+                this.setState({
+                  current_second: current_second - 1,
+                });
+              }, TIMER * 1000);
+
             } else {
               console.log('Tidak ada pesanan');
             }
@@ -87,24 +113,29 @@ class DashboardContainer extends React.Component {
       });
   }
 
-  async _getAllTask() {
-    const { onGetTask } = this.props;
-    const res = await TaskManager.getRegisteredTasksAsync();
-    // this.updateLocationTask = this.allTask.filter((task) => task.taskName === TASK);
-    console.log(res);
-    onGetTask(res);
 
-    // if (this.updateLocationTask.length) {
-    //   this.setState({
-    //     task  : this.updateLocationTask[0],
-    //     switch: true
-    //   })
-    // } else {
-    //   this.setState({
-    //     task  : {taskName:'none'},
-    //     switch: false
-    //   })
-    // }
+  async _getAllTask() {
+    const { dispatch } = this.props;
+    this.updateLocationTask = await TaskManager.getRegisteredTasksAsync();
+    this.updateLocationTask = this.allTask.filter((task) => task.taskName === TASK);
+
+    if (this.updateLocationTask.length) {
+      dispatch({
+        type: TOGGLE_AKTIF,
+        payload: {
+          taskname: this.updateLocationTask[0],
+          switch: true,
+        },
+      });
+    } else {
+      dispatch({
+        type: TOGGLE_AKTIF,
+        payload: {
+          task: 'none',
+          switch: false,
+        },
+      });
+    }
   }
 
 
@@ -112,22 +143,15 @@ class DashboardContainer extends React.Component {
     header: null,
   }
 
+
   render() {
-    return <Dashboard {...this.props} />; // eslint-disable-line
+    return <Dashboard second= {this.state.current_second} {...this.props} />; // eslint-disable-line
   }
 }
 
 DashboardContainer.propTypes = {
-  pid: PropsTypes.string,
-  onAdaPesanan: PropsTypes.func,
-  onGetLocation: PropsTypes.func,
-  onGetTask: PropsTypes.func.isRequired,
-};
-
-DashboardContainer.defaultProps = {
-  pid: '',
-  onAdaPesanan: () => console.log('sdsada'),
-  onGetLocation: () => console.log('sdsad'),
+  pid: PropsTypes.string.isRequired,
+  dispatch: PropsTypes.func.isRequired,
 };
 
 TaskManager.defineTask(TASK, async ({ data, error }) => {
@@ -137,12 +161,8 @@ TaskManager.defineTask(TASK, async ({ data, error }) => {
   }
 
   if (data) {
-
-    const { locations } = data;
-    const latitude = locations[0].coords.latitude
-    const longitude = locations[0].coords.longitude
-
-    const pid = await AsyncStorage.getItem('pid')
+    const { latitude, longitude } = data.location[0].coords;
+    const pid = await AsyncStorage.getItem('pid');
 
     if (!pid) {
       console.log('pid tidak ada');
@@ -154,8 +174,12 @@ TaskManager.defineTask(TASK, async ({ data, error }) => {
     })
       .then(() => console.log('success'))
       .catch((err) => console.log(err));
-
   }
-})
+});
 
-export default DashboardContainer;
+const mapStateToProps = (state) => ({
+  pid: state.partner_id,
+  taskname: state.status_aktif ? 'update-location' : 'none',
+});
+
+export default connect(mapStateToProps)(DashboardContainer);
