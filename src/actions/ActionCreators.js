@@ -9,9 +9,7 @@ import {
   LOGIN, LOGIN_SUCCESS, LOGIN_FAILED,
   SELESAIKAN_PESANAN,
   GO_TO_PELANGGAN,
-  ON_ADA_PESAN,
   UPDATE_LOCATION,
-  // TOGGLE_AKTIF,
 } from '../../constants/ActionTypes';
 import NavigationService from '../screens/navigation/NavigationService';
 import SCREEN from '../../constants/Screens';
@@ -49,41 +47,10 @@ export function login(form_input) {
   };
 }
 
-
-// Home Screen
-// export function togglePemijat() {
-//   return  async (dispatch) => {
-
-//     await this.setState({switch:!this.state.switch})
-//     const updateLocationTask = this.updateLocationTask
-
-//     if (this.state.switch) {
-//       await Location.startLocationUpdatesAsync(TASK, {
-//         accuracy: Location.Accuracy.High,
-//       });
-//       this._getAllTask()
-
-//     } else {
-//         if(updateLocationTask.length){
-//           TaskManager.unregisterTaskAsync(TASK)
-//           dbh.collection('activePartner').doc(this.state.pid).delete()
-//           this._getAllTask()
-//         }
-//     }
-//   };
-// }
-
 export function updateLocation(location) {
   return {
     type: UPDATE_LOCATION,
     payload: location,
-  };
-}
-
-export function tampilkanDialogPemesanan(data_pesan) {
-  return {
-    type: ON_ADA_PESAN,
-    payload: data_pesan,
   };
 }
 

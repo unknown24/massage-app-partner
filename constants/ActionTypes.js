@@ -13,7 +13,7 @@ export const GO_TO_PELANGGAN = 'GO_TO_PELANGGAN';
 
 export const UPDATE_LOCATION = 'UPDATE_LOCATION';
 export const UPDATE_PESANAN = 'UPDATE_PESANAN';
-
+export const UPDATE_CURRENT_PID = 'UPDATE_CURRENT_PID'; // partner_id
 
 // Accept Screen
 export const SELESAIKAN_PESANAN = 'SELESAIKAN_PESANAN';

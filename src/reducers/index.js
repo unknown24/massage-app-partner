@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS } from '../../constants/ActionTypes';
+import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS, UPDATE_CURRENT_PID } from '../../constants/ActionTypes';
 
 
 const initialData = {
@@ -36,6 +36,14 @@ function handlePemesananState(state = initialData, action) {
           current_pesanan: data,
           order_state: 'ada_pesanan',
         },
+      });
+      return new_state;
+    }
+
+    case UPDATE_CURRENT_PID: {
+      const data = action.payload;
+      const new_state = update(state, {
+        partner_id: { $set: data },
       });
       return new_state;
     }
