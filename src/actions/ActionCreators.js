@@ -3,6 +3,9 @@ import {
   ToastAndroid,
   AsyncStorage,
 } from 'react-native';
+import * as TaskManager from 'expo-task-manager';
+import * as Location from 'expo-location';
+
 import baseURL from '../../constants/API';
 import {
   TERIMA_PESANAN, TERIMA_PESANAN_SUCCESS, TERIMA_PESANAN_FAILED,
@@ -10,9 +13,13 @@ import {
   SELESAIKAN_PESANAN,
   GO_TO_PELANGGAN,
   UPDATE_LOCATION,
+  TOGGLE_AKTIF,
 } from '../../constants/ActionTypes';
 import NavigationService from '../screens/navigation/NavigationService';
 import SCREEN from '../../constants/Screens';
+import { TASK } from '../../constants/others';
+import { dbh, fb as firebase } from '../../library/firebase/firebase';
+
 
 // Login Screen
 export function login(form_input) {
@@ -47,12 +54,7 @@ export function login(form_input) {
   };
 }
 
-export function updateLocation(location) {
-  return {
-    type: UPDATE_LOCATION,
-    payload: location,
-  };
-}
+// Dashboard Screen
 
 export function goToPelanggan(detail_pelanggan) {
   return {
@@ -120,5 +122,48 @@ export function terimaPesanan(param) {
   };
 }
 
+// export function tolakPesanan(){
+//   return async (dispatch, getState) =>{
+//     dispatch()
+//   }
+// }
+
+
+export function toggleData() {
+  return async (dispatch, getState) => {
+    const { partner_id, status_aktif } = getState();
+    if (!status_aktif) {
+      dispatch({ type: TOGGLE_AKTIF, payload: true });
+      await Location.startLocationUpdatesAsync(TASK, {
+        accuracy: Location.Accuracy.High,
+      });
+
+      dispatch({ type: TOGGLE_AKTIF, payload: true });
+    } else {
+      TaskManager.unregisterTaskAsync(TASK);
+      dbh.collection('activePartner').doc(partner_id).delete();
+      dispatch({ type: TOGGLE_AKTIF, payload: false });
+    }
+  };
+}
+
+// Utility
+
+export function updateLocation(location) {
+  return {
+    type: UPDATE_LOCATION,
+    payload: location,
+  };
+}
+
+TaskManager.defineTask(TASK, async ({ data, error }) => {
+  const { latitude, longitude } = data.locations[0].coords;
+  const pid = await AsyncStorage.getItem('pid');
+  dbh.collection('activePartner').doc(pid).set({
+    lokasi: new firebase.firestore.GeoPoint(latitude, longitude),
+  })
+    .then(() => console.log('success'))
+    .catch((err) => console.log(err));
+});
 
 export default terimaPesanan;

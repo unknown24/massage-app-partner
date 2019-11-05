@@ -1,5 +1,5 @@
 import update from 'immutability-helper';
-import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS, UPDATE_CURRENT_PID } from '../../constants/ActionTypes';
+import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS, UPDATE_CURRENT_PID, TOGGLE_AKTIF } from '../../constants/ActionTypes';
 
 
 const initialData = {
@@ -36,6 +36,14 @@ function handlePemesananState(state = initialData, action) {
           current_pesanan: data,
           order_state: 'ada_pesanan',
         },
+      });
+      return new_state;
+    }
+
+    case TOGGLE_AKTIF: {
+      const data = action.payload;
+      const new_state = update(state, {
+        status_aktif: { $set: data },
       });
       return new_state;
     }

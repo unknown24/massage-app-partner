@@ -13,10 +13,12 @@ const firebaseConfig = {
 };
 
 
-function initApp(){
-    firebase.initializeApp(firebaseConfig);
-    return firebase
+function initApp() {
+  firebase.initializeApp(firebaseConfig);
+  return firebase;
 }
 
+export const fb = initApp();
+export const dbh = fb.firestore();
 
-export default initApp
+export default initApp;

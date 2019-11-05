@@ -2,25 +2,24 @@ import React from 'react';
 import PropsTypes from 'prop-types';
 import * as Permissions from 'expo-permissions'; // eslint-disable-line
 import * as TaskManager from 'expo-task-manager';
-import { ToastAndroid, Platform, AsyncStorage } from 'react-native';
+import { ToastAndroid, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { connect } from 'react-redux';
 import Dashboard from './Location';
-import initApp from '../library/firebase/firebase';
+import { dbh } from '../library/firebase/firebase';
 import { getLastString } from '../library/String';
 import { TOGGLE_AKTIF, UPDATE_PESANAN, UPDATE_LOCATION } from '../constants/ActionTypes';
+import { TASK, TIMER } from '../constants/others';
+import { toggleData } from '../src/actions/ActionCreators';
 
-const firebase = initApp();
-const dbh = firebase.firestore();
-const TASK = 'update-position';
-const TIMER = 20;
 
 class DashboardContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       current_second: TIMER,
+      isDisplayDialog: false,
     };
   }
 
@@ -75,6 +74,19 @@ class DashboardContainer extends React.Component {
     });
   }
 
+  handleUpdateData = () => {
+    const { dispatch } = this.props;
+
+    dispatch(toggleData());
+  }
+
+  handleTolakPesanan = () => {
+    clearInterval(this.int);
+    this.setState({
+      isDisplayDialog: false,
+    });
+  }
+
 
   _listenToPesanan() {
     const { pid, dispatch } = this.props;
@@ -97,13 +109,20 @@ class DashboardContainer extends React.Component {
                 type: UPDATE_PESANAN,
                 payload: pesanan[0],
               });
-
-              setTimeout(() => {
+              this.setState({ isDisplayDialog: true });
+              this.int = setInterval(() => {
                 const { current_second } = this.state;
-                this.setState({
-                  current_second: current_second - 1,
-                });
-              }, TIMER * 1000);
+                if (current_second > 0) {
+                  this.setState({
+                    current_second: current_second - 1,
+                  });
+                } else {
+                  clearInterval(this.int);
+                  this.setState({
+                    isDisplayDialog: false,
+                  });
+                }
+              }, 1000);
 
             } else {
               console.log('Tidak ada pesanan');
@@ -116,24 +135,18 @@ class DashboardContainer extends React.Component {
 
   async _getAllTask() {
     const { dispatch } = this.props;
-    this.updateLocationTask = await TaskManager.getRegisteredTasksAsync();
+    this.allTask = await TaskManager.getRegisteredTasksAsync();
     this.updateLocationTask = this.allTask.filter((task) => task.taskName === TASK);
 
     if (this.updateLocationTask.length) {
       dispatch({
         type: TOGGLE_AKTIF,
-        payload: {
-          taskname: this.updateLocationTask[0],
-          switch: true,
-        },
+        payload: true,
       });
     } else {
       dispatch({
         type: TOGGLE_AKTIF,
-        payload: {
-          task: 'none',
-          switch: false,
-        },
+        payload: false,
       });
     }
   }
@@ -145,7 +158,16 @@ class DashboardContainer extends React.Component {
 
 
   render() {
-    return <Dashboard second= {this.state.current_second} {...this.props} />; // eslint-disable-line
+    const { current_second, isDisplayDialog } = this.state;
+    return (
+      <Dashboard
+        displayDialogBox={isDisplayDialog}
+        onAktifkan={this.handleUpdateData}
+        onTolak={this.handleTolakPesanan}
+        second={current_second}
+        {...this.props} // eslint-disable-line 
+      />
+    );
   }
 }
 
@@ -154,32 +176,11 @@ DashboardContainer.propTypes = {
   dispatch: PropsTypes.func.isRequired,
 };
 
-TaskManager.defineTask(TASK, async ({ data, error }) => {
-  if (error) {
-    console.log(error);
-    return;
-  }
-
-  if (data) {
-    const { latitude, longitude } = data.location[0].coords;
-    const pid = await AsyncStorage.getItem('pid');
-
-    if (!pid) {
-      console.log('pid tidak ada');
-      return;
-    }
-
-    dbh.collection('activePartner').doc(pid).set({
-      lokasi: new firebase.firestore.GeoPoint(latitude, longitude),
-    })
-      .then(() => console.log('success'))
-      .catch((err) => console.log(err));
-  }
-});
 
 const mapStateToProps = (state) => ({
   pid: state.partner_id,
   taskname: state.status_aktif ? 'update-location' : 'none',
+  valueToggleAktifkan: state.status_aktif,
 });
 
 export default connect(mapStateToProps)(DashboardContainer);
