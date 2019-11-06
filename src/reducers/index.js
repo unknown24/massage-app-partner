@@ -1,5 +1,13 @@
 import update from 'immutability-helper';
-import { GO_TO_PELANGGAN, TERIMA_PESANAN, ON_ADA_PESAN, UPDATE_LOCATION, LOGIN, LOGIN_SUCCESS, UPDATE_CURRENT_PID, TOGGLE_AKTIF } from '../../constants/ActionTypes';
+import TERIMA_PESANAN, {
+  UPDATE_LOCATION,
+  LOGIN_SUCCESS,
+  UPDATE_CURRENT_PID,
+  TOGGLE_AKTIF,
+  UPDATE_ORDER_STATE,
+  UPDATE_PESANAN,
+  TERIMA_PESANAN_SUCCESS,
+} from '../../constants/ActionTypes';
 
 
 const initialData = {
@@ -15,27 +23,12 @@ const initialData = {
   },
 };
 
-function handlePemesananState(state = initialData, action) {
+function rootReducer(state = initialData, action) {
   switch (action.type) {
-    case ON_ADA_PESAN: {
-      /**
-        *
-        * @typedef {Object} data_pesanan
-        * @property {*} id_pesanan - "".
-        * @property {*} user_id - "".
-        * @property {*} lokasi - "".
-        * @property {*} payment - "".
-      */
-
-      /**
-       * @type {data_pesanan} data
-       */
+    case UPDATE_ORDER_STATE: {
       const data = action.payload;
       const new_state = update(state, {
-        current_client: {
-          current_pesanan: data,
-          order_state: 'ada_pesanan',
-        },
+        order_state: { $set: data },
       });
       return new_state;
     }
@@ -74,13 +67,24 @@ function handlePemesananState(state = initialData, action) {
     }
 
     case TERIMA_PESANAN: {
+      const new_state = update(state, {
+        order_state: { $set: 'go_to_pelanggan' },
+      });
+      return new_state;
+    }
+
+    case TERIMA_PESANAN_SUCCESS: {
+      /**
+      * @typedef {Object} Geopoint
+      * @property {number} longitude
+      * @property {number} latitude
+      */
+
       /**
         * wadaw
         * @typedef {Object} data_pesanan
-        * @property {*} id_pesanan - "".
-        * @property {*} user_id - "".
-        * @property {*} lokasi - "".
-        * @property {*} payment - "".
+        * @property {Geopoint} lokasi_client - "".
+        * @property {*} response
       */
 
       /**
@@ -89,9 +93,18 @@ function handlePemesananState(state = initialData, action) {
       const data = action.payload;
 
       const new_state = update(state, {
+        order_state: { $set: 'go_to_pelanggan' },
         current_client: {
-          alamat: data.lokasi,
+          alamat: { $set: data.lokasi_client },
         },
+      });
+      return new_state;
+    }
+
+    case UPDATE_PESANAN: {
+      const data = action.payload;
+      const new_state = update(state, {
+        current_pesanan: { $set: data },
       });
       return new_state;
     }
@@ -129,36 +142,10 @@ function handlePemesananState(state = initialData, action) {
       return new_state;
     }
 
-    case GO_TO_PELANGGAN: {
-      /**
-        * wadaw
-        * @typedef {Object} data
-        * @property {*} partner_id - "".
-        * @property {*} user_id - "".
-        * @property {*} status - "".
-        * @property {*} payment - "".
-      */
-
-      /**
-       * @type {data} data
-       */
-      const data = action.payload;
-
-      const new_state = update(state, {
-        current_client: {
-          nama: data,
-          alamat: '',
-          no_kontak: '',
-        },
-      });
-
-      return new_state;
-    }
-
     default:
       return state;
   }
 }
 
 
-export default handlePemesananState;
+export default rootReducer;

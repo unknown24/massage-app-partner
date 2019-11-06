@@ -11,9 +11,9 @@ import {
   TERIMA_PESANAN, TERIMA_PESANAN_SUCCESS, TERIMA_PESANAN_FAILED,
   LOGIN, LOGIN_SUCCESS, LOGIN_FAILED,
   SELESAIKAN_PESANAN,
-  GO_TO_PELANGGAN,
   UPDATE_LOCATION,
   TOGGLE_AKTIF,
+  UPDATE_ORDER_STATE,
 } from '../../constants/ActionTypes';
 import NavigationService from '../screens/navigation/NavigationService';
 import SCREEN from '../../constants/Screens';
@@ -56,13 +56,6 @@ export function login(form_input) {
 
 // Dashboard Screen
 
-export function goToPelanggan(detail_pelanggan) {
-  return {
-    type: GO_TO_PELANGGAN,
-    payload: detail_pelanggan,
-  };
-}
-
 export function selesaikanPesanan() {
   return (dispatch) => {
     dispatch({
@@ -72,13 +65,7 @@ export function selesaikanPesanan() {
 }
 
 
-export function terimaPesanan(param) {
-  const {
-    user_id,
-    payment,
-    id_pesanan,
-  } = param;
-
+export function terimaPesanan() {
   return (dispatch, getState) => {
     dispatch({
       type: TERIMA_PESANAN,
@@ -87,13 +74,33 @@ export function terimaPesanan(param) {
     const {
       partner_id,
       current_location,
+      current_pesanan,
     } = getState();
 
+    /**
+    * @typedef {Object} Geopoint
+    * @property {number} longitude
+    * @property {number} latitude
+    */
+
+    /**
+      * @typedef {Object} data_pesanan
+      * @property {*} id_pesanan - "".
+      * @property {*} user_id - "".
+      * @property {Geopoint} lokasi - "".
+      * @property {*} payment - "".
+    */
+
+    /**
+     * @type {data_pesanan} data
+     */
+    const data = current_pesanan;
+
     const bodyParam = {
-      user_id,
+      user_id: data.user_id,
       partner_id,
-      payment,
-      id_pesanan,
+      payment: data.payment,
+      id_pesanan: data.id_pesanan,
       location: current_location,
     };
     const stringified = queryString.stringify(bodyParam);
@@ -107,10 +114,13 @@ export function terimaPesanan(param) {
           return res.text();
         }
       }).then((res) => {
-        if (typeof res === 'object' && res.code === 200) {
+        if (typeof res === 'object' && res.error === '') {
           dispatch({
             type: TERIMA_PESANAN_SUCCESS,
-            payload: res,
+            payload: {
+              lokasi_client: data.lokasi,
+              response: res,
+            },
           });
         } else {
           dispatch({
@@ -122,11 +132,30 @@ export function terimaPesanan(param) {
   };
 }
 
-// export function tolakPesanan(){
-//   return async (dispatch, getState) =>{
-//     dispatch()
-//   }
-// }
+export function tolakPesanan() {
+  return async (dispatch, getState) => {
+    const { partner_id, current_pesanan } = getState();
+    const params = {
+      user_id: current_pesanan.user_id,
+      latitude: current_pesanan.lokasi.latitude,
+      longitude: current_pesanan.lokasi.longitude,
+      skipped: partner_id,
+      id_pesanan: current_pesanan.id_pesanan,
+    };
+    const stringified = queryString.stringify(params);
+    fetch(`${baseURL}massage-app-server/order.php?${stringified}`)
+      .then((res) => {
+        try {
+          return res.json();
+        } catch (error) {
+          console.log(error);
+          return res.text();
+        }
+      }).then(() => {
+        dispatch({ type: UPDATE_ORDER_STATE, payload: 'idle' });
+      });
+  };
+}
 
 
 export function toggleData() {

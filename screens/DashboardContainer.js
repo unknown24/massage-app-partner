@@ -9,9 +9,10 @@ import { connect } from 'react-redux';
 import Dashboard from './Location';
 import { dbh } from '../library/firebase/firebase';
 import { getLastString } from '../library/String';
-import { TOGGLE_AKTIF, UPDATE_PESANAN, UPDATE_LOCATION } from '../constants/ActionTypes';
+import { TOGGLE_AKTIF, UPDATE_PESANAN, UPDATE_LOCATION, UPDATE_ORDER_STATE } from '../constants/ActionTypes';
 import { TASK, TIMER } from '../constants/others';
-import { toggleData } from '../src/actions/ActionCreators';
+import { terimaPesanan, toggleData, tolakPesanan } from '../src/actions/ActionCreators';
+import SCREEN from '../constants/Screens';
 
 
 class DashboardContainer extends React.Component {
@@ -19,7 +20,6 @@ class DashboardContainer extends React.Component {
     super(props);
     this.state = {
       current_second: TIMER,
-      isDisplayDialog: false,
     };
   }
 
@@ -36,6 +36,11 @@ class DashboardContainer extends React.Component {
   async componentDidMount() {
     await this._listenToPesanan();
     await this._getAllTask();
+
+    const { order_state, navigation } = this.props;
+    if (order_state === 'go_to_pelanggan') {
+      navigation.navigate(SCREEN.GO_TO_PELANGGAN);
+    }
   }
 
 
@@ -76,15 +81,23 @@ class DashboardContainer extends React.Component {
 
   handleUpdateData = () => {
     const { dispatch } = this.props;
-
     dispatch(toggleData());
   }
 
   handleTolakPesanan = () => {
+    const { dispatch } = this.props;
+
     clearInterval(this.int);
-    this.setState({
-      isDisplayDialog: false,
-    });
+    dispatch(tolakPesanan());
+    this.setState({ current_second: TIMER });
+  }
+
+  handleTerimaPesanan = () => {
+    const { dispatch, navigation } = this.props;
+
+    dispatch(terimaPesanan());
+    navigation.navigate(SCREEN.GO_TO_PELANGGAN, { tipe: 'ready' });
+    this.setState({ current_second: TIMER });
   }
 
 
@@ -109,7 +122,11 @@ class DashboardContainer extends React.Component {
                 type: UPDATE_PESANAN,
                 payload: pesanan[0],
               });
-              this.setState({ isDisplayDialog: true });
+              dispatch({
+                type: UPDATE_ORDER_STATE,
+                payload: 'ada_pesanan',
+              });
+
               this.int = setInterval(() => {
                 const { current_second } = this.state;
                 if (current_second > 0) {
@@ -118,9 +135,11 @@ class DashboardContainer extends React.Component {
                   });
                 } else {
                   clearInterval(this.int);
-                  this.setState({
-                    isDisplayDialog: false,
+                  dispatch({
+                    type: UPDATE_ORDER_STATE,
+                    payload: 'idle',
                   });
+                  this.setState({current_second: TIMER });
                 }
               }, 1000);
 
@@ -158,11 +177,11 @@ class DashboardContainer extends React.Component {
 
 
   render() {
-    const { current_second, isDisplayDialog } = this.state;
+    const { current_second } = this.state;
     return (
       <Dashboard
-        displayDialogBox={isDisplayDialog}
         onAktifkan={this.handleUpdateData}
+        onTerima={this.handleTerimaPesanan}
         onTolak={this.handleTolakPesanan}
         second={current_second}
         {...this.props} // eslint-disable-line 
@@ -174,6 +193,10 @@ class DashboardContainer extends React.Component {
 DashboardContainer.propTypes = {
   pid: PropsTypes.string.isRequired,
   dispatch: PropsTypes.func.isRequired,
+  order_state: PropsTypes.string.isRequired,
+  navigation: PropsTypes.shape({
+    navigate: PropsTypes.func,
+  }).isRequired,
 };
 
 
@@ -181,6 +204,8 @@ const mapStateToProps = (state) => ({
   pid: state.partner_id,
   taskname: state.status_aktif ? 'update-location' : 'none',
   valueToggleAktifkan: state.status_aktif,
+  displayDialogBox: state.order_state === 'ada_pesanan',
+  order_state: state.order_state,
 });
 
 export default connect(mapStateToProps)(DashboardContainer);

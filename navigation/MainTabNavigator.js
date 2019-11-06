@@ -11,6 +11,7 @@ import LocationScreen from '../screens/DashboardContainer';
 import ReadyToGo from '../src/screens_connect/ReadyToGo.con';
 import Login from '../screens/Login'
 import AccountScreen from '../screens/Account'
+import SCREEN from '../constants/Screens';
 
 const config = Platform.select({  
   web             : { headerMode: 'screen' },
@@ -20,7 +21,7 @@ const config = Platform.select({
 const HomeStack = createStackNavigator(
   {
     Home : LocationScreen,
-    Ready: ReadyToGo,
+    [SCREEN.GO_TO_PELANGGAN]: ReadyToGo,
   },
   {
     initialRouteName: 'Home'

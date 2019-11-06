@@ -21,7 +21,6 @@ export default function Dashboard(props) {
     displayDialogBox,
     valueToggleAktifkan,
     second,
-    switch_,
     onTerima,
     onTolak,
     onAktifkan,
@@ -31,8 +30,7 @@ export default function Dashboard(props) {
   let statusImage;
   let statusText;
 
-
-  if (switch_) {
+  if (valueToggleAktifkan) {
     statusText = 'Kamu Online';
     statusImage = online_image;
   } else {
@@ -95,7 +93,6 @@ Dashboard.propTypes = {
   onTerima: PropTypes.func,
   onTolak: PropTypes.func,
   onAktifkan: PropTypes.func,
-  switch_: PropTypes.bool,
   second: PropTypes.number,
 };
 
@@ -104,7 +101,6 @@ Dashboard.defaultProps = {
   taskname: 'dsadsa',
   displayDialogBox: false,
   valueToggleAktifkan: false,
-  switch_: false,
   second: 20,
   onTerima: () => console.log(34),
   onTolak: () => console.log(34),
