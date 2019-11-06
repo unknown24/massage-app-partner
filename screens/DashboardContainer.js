@@ -9,7 +9,12 @@ import { connect } from 'react-redux';
 import Dashboard from './Location';
 import { dbh } from '../library/firebase/firebase';
 import { getLastString } from '../library/String';
-import { TOGGLE_AKTIF, UPDATE_PESANAN, UPDATE_LOCATION, UPDATE_ORDER_STATE } from '../constants/ActionTypes';
+import {
+  TOGGLE_AKTIF,
+  UPDATE_PESANAN,
+  UPDATE_LOCATION,
+  UPDATE_ORDER_STATE,
+} from '../constants/ActionTypes';
 import { TASK, TIMER } from '../constants/others';
 import { terimaPesanan, toggleData, tolakPesanan } from '../src/actions/ActionCreators';
 import SCREEN from '../constants/Screens';
@@ -139,10 +144,9 @@ class DashboardContainer extends React.Component {
                     type: UPDATE_ORDER_STATE,
                     payload: 'idle',
                   });
-                  this.setState({current_second: TIMER });
+                  this.setState({ current_second: TIMER });
                 }
               }, 1000);
-
             } else {
               console.log('Tidak ada pesanan');
             }

@@ -1,5 +1,6 @@
 import update from 'immutability-helper';
-import TERIMA_PESANAN, {
+import {
+  TERIMA_PESANAN,
   UPDATE_LOCATION,
   LOGIN_SUCCESS,
   UPDATE_CURRENT_PID,

@@ -3,34 +3,32 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
 import LinksScreen from '../screens/LinksScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import LocationScreen from '../screens/DashboardContainer';
 // import ReadyToGo from '../components/sub-screen/readyToGo';
 import ReadyToGo from '../src/screens_connect/ReadyToGo.con';
-import Login from '../screens/Login'
-import AccountScreen from '../screens/Account'
+import AccountScreen from '../screens/Account';
 import SCREEN from '../constants/Screens';
 
-const config = Platform.select({  
-  web             : { headerMode: 'screen' },
-  default         : {}
+const config = Platform.select({
+  web: { headerMode: 'screen' },
+  default: {},
 });
 
 const HomeStack = createStackNavigator(
   {
-    Home : LocationScreen,
+    Home: LocationScreen,
     [SCREEN.GO_TO_PELANGGAN]: ReadyToGo,
   },
   {
-    initialRouteName: 'Home'
-  }
+    initialRouteName: 'Home',
+  },
 );
 
 HomeStack.navigationOptions = {
   tabBarLabel: 'Home',
-  tabBarIcon: ({ focused }) => (
+  tabBarIcon: ({ focused }) => ( // eslint-disable-line
     <TabBarIcon
       focused={focused}
       name={
@@ -47,12 +45,12 @@ HomeStack.path = '';
 
 const AccountStack = createStackNavigator({
   Account: AccountScreen,
-}, config )
+}, config);
 
 
 AccountStack.navigationOptions = {
   tabBarLabel: 'Account',
-  tabBarIcon : ({ focused }) => (
+  tabBarIcon: ({ focused }) => ( // eslint-disable-line
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'} />
   ),
 };
@@ -64,12 +62,12 @@ const LinksStack = createStackNavigator(
   {
     Links: LinksScreen,
   },
-  config
+  config,
 );
 
 LinksStack.navigationOptions = {
   tabBarLabel: 'Links',
-  tabBarIcon: ({ focused }) => (
+  tabBarIcon: ({ focused }) => ( // eslint-disable-line
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'} />
   ),
 };
@@ -80,12 +78,12 @@ const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
   },
-  config
+  config,
 );
 
 SettingsStack.navigationOptions = {
   tabBarLabel: 'Settings',
-  tabBarIcon: ({ focused }) => (
+  tabBarIcon: ({ focused }) => ( //eslint-disable-line
     <TabBarIcon focused={focused} name={Platform.OS === 'ios' ? 'ios-options' : 'md-options'} />
   ),
 };

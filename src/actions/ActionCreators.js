@@ -193,6 +193,7 @@ TaskManager.defineTask(TASK, async ({ data, error }) => {
   })
     .then(() => console.log('success'))
     .catch((err) => console.log(err));
+  console.log(error);
 });
 
 export default terimaPesanan;
