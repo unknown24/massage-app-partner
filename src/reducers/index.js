@@ -75,28 +75,14 @@ function rootReducer(state = initialData, action) {
     }
 
     case TERIMA_PESANAN_SUCCESS: {
-      /**
-      * @typedef {Object} Geopoint
-      * @property {number} longitude
-      * @property {number} latitude
-      */
-
-      /**
-        * wadaw
-        * @typedef {Object} data_pesanan
-        * @property {Geopoint} lokasi_client - "".
-        * @property {*} response
-      */
-
-      /**
-       * @type {data_pesanan} data
-       */
       const data = action.payload;
 
       const new_state = update(state, {
         order_state: { $set: 'go_to_pelanggan' },
         current_client: {
+          nama: { $set: data.nama },
           alamat: { $set: data.lokasi_client },
+          no_kontak: { $set: data.kontak },
         },
       });
       return new_state;

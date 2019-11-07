@@ -113,13 +113,40 @@ export function terimaPesanan() {
         } catch (error) {
           return res.text();
         }
-      }).then((res) => {
+      }).then(async (res) => {
         if (typeof res === 'object' && res.error === '') {
+          /**
+            * @typedef {Object} res_location
+            * @property {*} city - "".
+            * @property {*} country - "".
+            * @property {*} isoCountryCode - "".
+            * @property {*} name - "".
+            * @property {*} postalCode - "".
+            * @property {*} region - "".
+            * @property {*} street - "".
+            *
+          */
+
+          /**
+           * @type {res_location} res_
+           */
+          const res_ = await Location.reverseGeocodeAsync(data.lokasi);
+
+          /**
+           * id": "1",
+          "email": "aep.stmik@gmail.com",
+          "telepon": "123456",
+          "password": "e10adc3949ba59abbe56e057f20f883e",
+          "tipe": "user"
+           */
+
+          const res_user = await fetch(`${baseURL}apps/users/detail/${data.user_id}`).then((r) => r.json());
           dispatch({
             type: TERIMA_PESANAN_SUCCESS,
             payload: {
-              lokasi_client: data.lokasi,
-              response: res,
+              nama: res_user[0].email,
+              lokasi_client: `${res_[0].street} ${res_[0].city} ${res_[0].name} ${res_[0].region} ${res_[0].country} ${res_[0].postalCode}`,
+              kontak: res_user[0].telepon,
             },
           });
         } else {

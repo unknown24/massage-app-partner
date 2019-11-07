@@ -4,7 +4,7 @@ import { selesaikanPesanan } from '../actions/ActionCreators';
 
 const mapStateToProps = (state) => ({
   nama: state.current_client.nama,
-  alamat: JSON.stringify(state.current_client.alamat),
+  alamat: state.current_client.alamat,
   kontak: state.current_client.no_kontak,
 });
 
