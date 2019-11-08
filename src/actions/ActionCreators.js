@@ -10,10 +10,10 @@ import baseURL from '../../constants/API';
 import {
   TERIMA_PESANAN, TERIMA_PESANAN_SUCCESS, TERIMA_PESANAN_FAILED,
   LOGIN, LOGIN_SUCCESS, LOGIN_FAILED,
-  SELESAIKAN_PESANAN,
   UPDATE_LOCATION,
   TOGGLE_AKTIF,
   UPDATE_ORDER_STATE,
+  SELESAIKAN_PESANAN_SUCCESS,
 } from '../../constants/ActionTypes';
 import NavigationService from '../screens/navigation/NavigationService';
 import SCREEN from '../../constants/Screens';
@@ -57,10 +57,39 @@ export function login(form_input) {
 // Dashboard Screen
 
 export function selesaikanPesanan() {
-  return (dispatch) => {
-    dispatch({
-      type: SELESAIKAN_PESANAN,
-    });
+  return (dispatch, getState) => {
+    const { current_pesanan } = getState();
+
+
+    /**
+    * @typedef {Object} Geopoint
+    * @property {number} longitude
+    * @property {number} latitude
+    */
+
+    /**
+      * @typedef {Object} data_pesanan
+      * @property {*} id_pesanan - "".
+      * @property {*} user_id - "".
+      * @property {Geopoint} lokasi - "".
+      * @property {*} payment - "".
+    */
+
+    /**
+     * @type {data_pesanan} pesanan
+     */
+    const pesanan = current_pesanan;
+
+    fetch(`${baseURL}/massage-app-server/apis/terapis/pesanan-selesai.php?id_pesanan=${pesanan.id_pesanan}`)
+      .then((res) => res.json())
+      .then((res) => {
+        console.log(res)
+        dispatch({
+          type: SELESAIKAN_PESANAN_SUCCESS,
+          payload: res,
+        });
+        NavigationService.navigate(SCREEN.HOME);
+      });
   };
 }
 
