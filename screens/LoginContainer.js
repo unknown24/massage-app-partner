@@ -16,7 +16,7 @@ class LoginContainer extends React.Component {
       const { onMounted } = this.props;
       const pid = await AsyncStorage.getItem('pid');
       onMounted(pid);
-      navigation.navigate(SCREEN.HOME);
+      navigation.navigate(SCREEN.DASHBOARD);
     }
   }
 

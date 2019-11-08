@@ -39,7 +39,7 @@ export function login(form_input) {
               payload: res,
             });
             AsyncStorage.multiSet([['login', '1'], ['pid', res.data.id]])
-              .then(() => NavigationService.navigate(SCREEN.HOME));
+              .then(() => NavigationService.navigate(SCREEN.DASHBOARD));
           } else {
             dispatch({
               type: LOGIN_FAILED,
@@ -59,7 +59,6 @@ export function login(form_input) {
 export function selesaikanPesanan() {
   return (dispatch, getState) => {
     const { current_pesanan } = getState();
-
 
     /**
     * @typedef {Object} Geopoint
@@ -81,14 +80,17 @@ export function selesaikanPesanan() {
     const pesanan = current_pesanan;
 
     fetch(`${baseURL}/massage-app-server/apis/terapis/pesanan-selesai.php?id_pesanan=${pesanan.id_pesanan}`)
-      .then((res) => res.json())
+      .then((res) => res.text())
       .then((res) => {
-        console.log(res)
-        dispatch({
-          type: SELESAIKAN_PESANAN_SUCCESS,
-          payload: res,
-        });
-        NavigationService.navigate(SCREEN.HOME);
+        console.log(res, 'dasds');
+        NavigationService.navigate(SCREEN.DASHBOARD);
+        
+        if (typeof res === 'object') {
+          dispatch({
+            type: SELESAIKAN_PESANAN_SUCCESS,
+            payload: res,
+          });
+        }
       });
   };
 }
@@ -176,6 +178,7 @@ export function terimaPesanan() {
               nama: res_user[0].email,
               lokasi_client: `${res_[0].street} ${res_[0].city} ${res_[0].name} ${res_[0].region} ${res_[0].country} ${res_[0].postalCode}`,
               kontak: res_user[0].telepon,
+              id_pesanan: res.result,
             },
           });
         } else {

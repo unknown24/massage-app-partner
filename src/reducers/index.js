@@ -9,6 +9,7 @@ import {
   UPDATE_PESANAN,
   TERIMA_PESANAN_SUCCESS,
 } from '../../constants/ActionTypes';
+import { getLastString } from '../../library/String';
 
 
 const initialData = {
@@ -67,24 +68,21 @@ function rootReducer(state = initialData, action) {
       return new_state;
     }
 
-    case TERIMA_PESANAN: {
-      const new_state = update(state, {
-        order_state: { $set: 'go_to_pelanggan' },
-      });
-      return new_state;
-    }
-
     case TERIMA_PESANAN_SUCCESS: {
       const data = action.payload;
 
       const new_state = update(state, {
         order_state: { $set: 'go_to_pelanggan' },
+        current_pesanan: {
+          id_pesanan: { $set: getLastString(data.id_pesanan.name) },
+        },
         current_client: {
           nama: { $set: data.nama },
           alamat: { $set: data.lokasi_client },
           no_kontak: { $set: data.kontak },
         },
       });
+      console.log(new_state)
       return new_state;
     }
 

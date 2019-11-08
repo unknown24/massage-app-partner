@@ -7,7 +7,7 @@ import SCREEN from '../constants/Screens';
 
 export default createAppContainer(
   createSwitchNavigator({
-    [SCREEN.HOME]: MainNavigator,
+    [SCREEN.DASHBOARD]: MainNavigator,
     Register: RegisterScreen,
     Login: LoginScreen,
   },

@@ -18,11 +18,11 @@ const config = Platform.select({
 
 const HomeStack = createStackNavigator(
   {
-    Home: LocationScreen,
+    [SCREEN.DASHBOARD]: LocationScreen,
     [SCREEN.GO_TO_PELANGGAN]: ReadyToGo,
   },
   {
-    initialRouteName: 'Home',
+    initialRouteName: SCREEN.DASHBOARD,
   },
 );
 
