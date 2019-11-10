@@ -107,7 +107,7 @@ export function selesaikanPesanan() {
 
 
 export function terimaPesanan() {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     dispatch({
       type: TERIMA_PESANAN,
     });
@@ -137,12 +137,15 @@ export function terimaPesanan() {
      */
     const data = current_pesanan;
 
+    const location_obj = await Location.reverseGeocodeAsync(current_location);
+    const location_string = `${location_obj[0].street} ${location_obj[0].city} ${location_obj[0].name} ${location_obj[0].region} ${location_obj[0].country} ${location_obj[0].postalCode} `;
+
     const bodyParam = {
       user_id: data.user_id,
       partner_id,
       payment: data.payment,
       id_pesanan: data.id_pesanan,
-      location: current_location,
+      location: location_string,
     };
     const stringified = queryString.stringify(bodyParam);
 
@@ -155,6 +158,7 @@ export function terimaPesanan() {
           return res.text();
         }
       }).then(async (res) => {
+        console.log(res)
         if (typeof res === 'object' && res.error === '') {
           /**
             * @typedef {Object} res_location
