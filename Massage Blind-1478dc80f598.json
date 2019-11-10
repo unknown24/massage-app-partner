@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "massage-blind",
+  "private_key_id": "1478dc80f5987cc4d3c60972adda04658acc688b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQChX8M5/lA864qw\n5O3DoutfvGR+hXDINhGR9NDN1xfJ7WgMNpb1g8Q6ulmgG6GJamlOljUgHdQQkO62\nwV51YueEjenMa+X5iEAc9hrHLRE68+iVmRyuI7D7an7CiSHUntyJec5pUWsYki8v\nVR8nKQ4y7xaRLA+4LHOdagTWu8EmCo8R8uQY9AFa1hXnOpBaZCr0xjuoK9esSlq7\nN4VLk9i2VXOWURv3UEzbS7KtwH+nwvmUwogeTc6ejs4fy49Kr03F2OC33c+BTU7n\n/ghpbTb5ZbGjY0xV1qAjMqmym+Aq1EJRFBKwfz6vLc2PxpLzs6Ms4fmZJo5r6WGl\nMRUJm4+9AgMBAAECggEAAgvGXE1KDqUCM+Z0e5sXRrY12aMkUCwxUlYAh2Tp/2HU\nGc2KYfAAVFSfBMg85tKzeu8tcBa4uiy1k28bB7wlM87Jz1FHOpVHPNFuUFFVCy04\nU8c7xXBx6BTMU81BzCHnKWi4MikkWrd7GNZIiBT9l1iP2G+EKSwKcOKSekzUm4Bt\nv4xS5mGGZHWfLh/fdGyCHF3QfWRL1t4uigWKPEMl91j6CkzkCkZQWPHYnNNUWuG1\nSg6BNRx4KrVtzV91MSnskq1OsO5VSdtZJljkadTNARzFXcgFTwSzdTUKyHsQ0PC/\n/AFXptHUEnAF2objK+wXrUQWT7g7n01Aq+K0Vbg3qQKBgQDkIT12oKJ+edSLWdFy\nlUAw4rMv8rIun1bp8o20eEAztH2D/kUynBkjZzKc6pljAcVV2aSaXZMx+GgAajMn\nNhaXZEYgVSw/MJlkMEDlUGIy6rhH3Yyt8oTq7raUhExUQ21AriDkkBj8zOfuoIyS\nLQuSetNfCrryAnqXvE/nsvs3CQKBgQC1FrxtVHLa6+M6X0hvF6TaF9k4RH8b8c54\n6Uv/xJmJfEbiVmsPEoznFRgeDbqvNcyz5rlorA7Qw8AaNAn4aRS/88ZYsKI+18+e\nGKWds5avJym8Rj7UStKgaUwMfvMNeyN0Up3XX76VzwoJYnti1YSG5JsSDazLuBy3\nOjqVrVasFQKBgHRRno1GCpSCeiUzft/1ye0jKkpgbQnopOBUlHxYdCPo+7a5h37u\nqMKsc9oepGcfGAdWGd+7prnr9tt/SuXLZml672a9BvqRRSUYlX5XJjrgA2ZhSMHI\nzo0bemzvqBuu5Z39KzhfYN5FfFzn78T4wtXFWtEzH28WZHvJwNRbJkxBAoGAVDOb\nL9bphOPUB0tQud8rlwEpzqEC3XKFB/GqleXLYoM3znxSUXLVs4k6apcFq/x/D1OD\n+KiwRuAOTeDOlgP+Uva9znVrK39bmW5qa7aapRy3qkSbaEjWQSJU6yaIS0drh+X2\nYLOzQaNATnbNWnpfof1gIXfcVelo6MWZgglUWLUCgYEAxesLV9SEdYHxluVOU0Vx\np4oxQJGiQL0LMehNCFZH+tCvWKocW/D2Ou5z8BvQZ5vaOqfkNraNgeV85hfRVb8e\nIRNRoTJPBR3ubSJS+29IcvpcveiCUi+CjXemO2x/YbHRyeZayLADpVAwKpvMopPQ\nwxb8CQTSe1LsG1oCsEimZ9w=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-hdm1k@massage-blind.iam.gserviceaccount.com",
+  "client_id": "117539535555165911732",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hdm1k%40massage-blind.iam.gserviceaccount.com"
+}

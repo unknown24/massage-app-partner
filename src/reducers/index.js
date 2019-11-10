@@ -1,6 +1,5 @@
 import update from 'immutability-helper';
 import {
-  TERIMA_PESANAN,
   UPDATE_LOCATION,
   LOGIN_SUCCESS,
   UPDATE_CURRENT_PID,
@@ -17,7 +16,7 @@ const initialData = {
   current_location: null,
   status_aktif: false,
   order_state: 'idle',
-  current_pesanan: null,
+  current_pesanan: {},
   current_client: {
     nama: 'system',
     alamat: 'system',
@@ -82,14 +81,13 @@ function rootReducer(state = initialData, action) {
           no_kontak: { $set: data.kontak },
         },
       });
-      console.log(new_state)
       return new_state;
     }
 
     case UPDATE_PESANAN: {
       const data = action.payload;
       const new_state = update(state, {
-        current_pesanan: { $set: data },
+        current_pesanan: { $merge: data },
       });
       return new_state;
     }

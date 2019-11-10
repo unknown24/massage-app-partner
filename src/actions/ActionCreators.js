@@ -58,7 +58,7 @@ export function login(form_input) {
 
 export function selesaikanPesanan() {
   return (dispatch, getState) => {
-    const { current_pesanan } = getState();
+    const { current_pesanan, partner_id } = getState();
 
     /**
     * @typedef {Object} Geopoint
@@ -78,13 +78,23 @@ export function selesaikanPesanan() {
      * @type {data_pesanan} pesanan
      */
     const pesanan = current_pesanan;
+    const data = {
+      id_pesanan: pesanan.id_pesanan,
+      client_id: pesanan.user_id,
+      partner_id,
+      products: pesanan.products,
+    };
 
-    fetch(`${baseURL}/massage-app-server/apis/terapis/pesanan-selesai.php?id_pesanan=${pesanan.id_pesanan}`)
-      .then((res) => res.text())
+    fetch(`${baseURL}/massage-app-server/apis/terapis/pesanan-selesai.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((res) => res.json())
       .then((res) => {
-        console.log(res, 'dasds');
         NavigationService.navigate(SCREEN.DASHBOARD);
-        
         if (typeof res === 'object') {
           dispatch({
             type: SELESAIKAN_PESANAN_SUCCESS,

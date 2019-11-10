@@ -119,6 +119,9 @@ class DashboardContainer extends React.Component {
                 user_id: doc.data().user_id,
                 lokasi: doc.data().user_location,
                 payment: doc.data().payment,
+                distance: doc.data().distance,
+                name: doc.data().name,
+                products: doc.data().products,
               });
             });
 
